@@ -1,160 +1,196 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-  <meta charset="UTF-8" />
-  <title>Форма заказа книги</title>
+  <meta charset="UTF-8">
+  <title>Форма заказа / Запрос наличия</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
   <style>
     body {
-      background: #f5f7fa;
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      font-family: Arial, sans-serif;
+      background: #f2f2f2;
+      padding: 20px;
       display: flex;
       justify-content: center;
-      align-items: center;
-      height: 100vh;
-      margin: 0;
-      padding: 20px;
     }
-    form {
+
+    .container {
       background: white;
-      padding: 30px 40px;
+      padding: 25px;
       border-radius: 10px;
       box-shadow: 0 10px 25px rgba(0,0,0,0.1);
-      max-width: 400px;
+      max-width: 450px;
       width: 100%;
     }
+
     h2 {
-      margin-bottom: 25px;
-      color: #333;
       text-align: center;
+      margin-bottom: 20px;
     }
+
     label {
       display: block;
-      margin-bottom: 15px;
-      color: #555;
-      font-weight: 600;
+      margin: 12px 0 5px;
+      font-weight: bold;
     }
-  input[type="text"],
-input[type="tel"],
-input[type="number"],
-select,
-textarea {
 
+    input, select, textarea {
       width: 100%;
-      padding: 10px 12px;
-      border: 1.8px solid #ccc;
+      padding: 10px;
       border-radius: 6px;
+      border: 1.5px solid #ccc;
       font-size: 14px;
       box-sizing: border-box;
-      transition: border-color 0.3s;
-      font-family: inherit;
-      resize: vertical;
     }
-    
-    input[type="text"]:focus,
-    input[type="tel"]:focus,
-    select:focus,
-    textarea:focus {
-      border-color: #007BFF;
-      outline: none;
-    }
-    textarea {
-      min-height: 70px;
-    }
+
     button {
       width: 100%;
       padding: 12px;
-      background-color: #007BFF;
+      margin-top: 15px;
+      background-color: #007bff;
       border: none;
-      border-radius: 8px;
       color: white;
       font-size: 16px;
-      font-weight: 700;
+      border-radius: 8px;
       cursor: pointer;
-      transition: background-color 0.3s;
-      margin-top: 10px;
     }
+
     button:hover {
       background-color: #0056b3;
+    }
+
+    .form-toggle {
+      margin-bottom: 20px;
+    }
+
+    .form-section {
+      display: none;
+    }
+
+    .form-section.active {
+      display: block;
     }
   </style>
 </head>
 <body>
+  <div class="container">
+    <h2>Выберите действие</h2>
 
-  <form id="orderForm">
-    <h2>Форма заказа книги</h2>
-
-    <label>
-      Название онлайн магазина:
-      <input type="text" name="storeName" required>
-    </label>
-
-    <label>
-      Название книги:
-      <input type="text" name="bookName" required>
-    </label>
-
-    <label>
-  Сколько штук:
-  <input type="number" name="quantity" min="1" value="1" required>
-</label>
-
-    <label>
-      Телефонный номер:
-      <input type="tel" name="phone" required pattern="[\+0-9\s\-]{6,15}" title="Введите корректный телефон">
-    </label>
-
-    <label>
-      Переплет книги:
-      <select name="binding" required>
-        <option value="">Выберите вариант</option>
-        <option value="твердый">Твердый</option>
-        <option value="мягкий">Мягкий</option>
+    <div class="form-toggle">
+      <select id="formSelector">
+        <option value="order">Оформить заказ</option>
+        <option value="check">Узнать наличие книги</option>
       </select>
-    </label>
+    </div>
 
-    <label>
-      Адрес:
-      <textarea name="address" required></textarea>
-    </label>
+    <!-- Форма оформления заказа -->
+    <form id="orderForm" class="form-section active">
+      <label>Название онлайн магазина:
+        <input type="text" name="storeName" required>
+      </label>
+      <label>Название книги:
+        <input type="text" name="bookName" required>
+      </label>
+      <label>Сколько штук:
+        <input type="number" name="quantity" min="1" value="1" required>
+      </label>
+      <label>Телефонный номер:
+        <input type="tel" name="phone" required pattern="[\+0-9\s\-]{6,15}">
+      </label>
+      <label>Переплет книги:
+        <select name="binding" required>
+          <option value="">Выберите вариант</option>
+          <option value="твердый">Твердый</option>
+          <option value="мягкий">Мягкий</option>
+        </select>
+      </label>
+      <label>Адрес:
+        <textarea name="address" required></textarea>
+      </label>
+      <button type="submit">Отправить заказ</button>
+    </form>
 
-    <button type="submit">Отправить</button>
-  </form>
+    <!-- Форма запроса наличия -->
+    <form id="checkForm" class="form-section">
+      <label>Название книги:
+        <input type="text" id="checkBook" required>
+      </label>
+      <label>Номер телефона (Telegram):
+        <input type="tel" id="checkPhone" required pattern="[\+0-9\s\-]{6,15}">
+      </label>
+      <button type="button" onclick="sendToTelegram()">Отправить запрос</button>
+    </form>
+  </div>
 
-<script>
-  const form = document.getElementById('orderForm');
-  form.addEventListener('submit', e => {
-    e.preventDefault();
+  <script>
+    // Переключение между формами
+    const formSelector = document.getElementById('formSelector');
+    const orderForm = document.getElementById('orderForm');
+    const checkForm = document.getElementById('checkForm');
 
-    const formData = new FormData(form);
-    const data = new URLSearchParams();
-
-    for (const [key, value] of formData.entries()) {
-      data.append(key, value);
-    }
-
-    fetch('https://script.google.com/macros/s/AKfycbx-24wdF6cr2OfdhW-z45JpBGo5yseC6T4V9T0I_KF7m_jy7k1odq7DQYiaB6nvZ6Q7/exec', {
-      method: 'POST',
-      body: data,
-      headers: {
-        'Content-Type': 'application/x-www-form-urlencoded'
+    formSelector.addEventListener('change', function () {
+      if (this.value === 'order') {
+        orderForm.classList.add('active');
+        checkForm.classList.remove('active');
+      } else {
+        orderForm.classList.remove('active');
+        checkForm.classList.add('active');
       }
-    })
-    .then(response => {
-      // Даже если не получили JSON — считаем заказ принятым
-      alert('Ваш заказ принят!');
-      form.reset();
-    })
-    .catch(error => {
-      // Даже если fetch упал — всё равно сообщаем, что заказ принят
-      alert('Ваш заказ принят!');
-      form.reset();
     });
-  });
-</script>
 
+    // Отправка формы заказа
+    orderForm.addEventListener('submit', function (e) {
+      e.preventDefault();
+      const formData = new FormData(orderForm);
+      const data = new URLSearchParams();
+      for (const [key, value] of formData.entries()) {
+        data.append(key, value);
+      }
 
+      fetch('https://script.google.com/macros/s/AKfycbzYICq5FEXnSl5AfKsK9vsHGfucVAKd1zN167RNKyDboSbAur8OBhkN5Tx0RRBna4C6/exec', {
+        method: 'POST',
+        body: data,
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
+      })
+      .then(() => {
+        alert('Ваш заказ принят!');
+        orderForm.reset();
+      })
+      .catch(() => {
+        alert('Произошла ошибка. Попробуйте позже.');
+      });
+    });
 
+    // Отправка запроса наличия книги в Telegram
+    function sendToTelegram() {
+      const book = document.getElementById('checkBook').value.trim();
+      const phone = document.getElementById('checkPhone').value.trim();
+
+      if (!book || !phone) {
+        alert("Пожалуйста, заполните все поля.");
+        return;
+      }
+
+      const message = `📚 *Запрос на наличие книги*\n\nНазвание: *${book}*\nТелефон: *${phone}*`;
+      const token = '7601774753:AAEo6MkBupH__OQWnKhB_AsG6ieE1LO4bsI';
+      const chatId = '257363972';
+
+      fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          chat_id: chatId,
+          text: message,
+          parse_mode: 'Markdown'
+        })
+      })
+      .then(() => {
+        alert('Запрос отправлен. Мы свяжемся с вами в Telegram.');
+        checkForm.reset();
+      })
+      .catch(() => {
+        alert('Ошибка при отправке. Попробуйте позже.');
+      });
+    }
+  </script>
 </body>
 </html>
