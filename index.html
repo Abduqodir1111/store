@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <title>Форма заказа книги</title>
+  <style>
+    body {
+      background: #f5f7fa;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+      padding: 20px;
+    }
+    form {
+      background: white;
+      padding: 30px 40px;
+      border-radius: 10px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+      max-width: 400px;
+      width: 100%;
+    }
+    h2 {
+      margin-bottom: 25px;
+      color: #333;
+      text-align: center;
+    }
+    label {
+      display: block;
+      margin-bottom: 15px;
+      color: #555;
+      font-weight: 600;
+    }
+    input[type="text"],
+    input[type="tel"],
+    select,
+    textarea {
+      width: 100%;
+      padding: 10px 12px;
+      border: 1.8px solid #ccc;
+      border-radius: 6px;
+      font-size: 14px;
+      box-sizing: border-box;
+      transition: border-color 0.3s;
+      font-family: inherit;
+      resize: vertical;
+    }
+    input[type="text"]:focus,
+    input[type="tel"]:focus,
+    select:focus,
+    textarea:focus {
+      border-color: #007BFF;
+      outline: none;
+    }
+    textarea {
+      min-height: 70px;
+    }
+    button {
+      width: 100%;
+      padding: 12px;
+      background-color: #007BFF;
+      border: none;
+      border-radius: 8px;
+      color: white;
+      font-size: 16px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: background-color 0.3s;
+      margin-top: 10px;
+    }
+    button:hover {
+      background-color: #0056b3;
+    }
+  </style>
+</head>
+<body>
+
+  <form id="orderForm">
+    <h2>Форма заказа книги</h2>
+
+    <label>
+      Название онлайн магазина:
+      <input type="text" name="storeName" required>
+    </label>
+
+    <label>
+      Название книги:
+      <input type="text" name="bookName" required>
+    </label>
+
+    <label>
+      Телефонный номер:
+      <input type="tel" name="phone" required pattern="[\+0-9\s\-]{6,15}" title="Введите корректный телефон">
+    </label>
+
+    <label>
+      Переплет книги:
+      <select name="binding" required>
+        <option value="">Выберите вариант</option>
+        <option value="твердый">Твердый</option>
+        <option value="мягкий">Мягкий</option>
+      </select>
+    </label>
+
+    <label>
+      Адрес:
+      <textarea name="address" required></textarea>
+    </label>
+
+    <button type="submit">Отправить</button>
+  </form>
+
+<script>
+  const form = document.getElementById('orderForm');
+  form.addEventListener('submit', e => {
+    e.preventDefault();
+
+    const formData = new FormData(form);
+    const data = new URLSearchParams();
+
+    for (const [key, value] of formData.entries()) {
+      data.append(key, value);
+    }
+
+    fetch('https://script.google.com/macros/s/AKfycbzYICq5FEXnSl5AfKsK9vsHGfucVAKd1zN167RNKyDboSbAur8OBhkN5Tx0RRBna4C6/exec', {
+      method: 'POST',
+      body: data,
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded'
+      }
+    })
+    .then(response => response.json())
+    .then(result => {
+      if(result.result === "success"){
+        alert('Заказ успешно отправлен!');
+        form.reset();
+      } else {
+        alert('Ошибка: ' + JSON.stringify(result));
+      }
+    })
+    .catch(error => alert('Ошибка сети или сервера: ' + error));
+  });
+</script>
+
+
+</body>
+</html>
